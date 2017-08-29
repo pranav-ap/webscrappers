@@ -1,25 +1,26 @@
-# To get the 20 words and their frequency percentage 
-# with highest frequency in an English Wikipedia article. 
+#To get the 20 words and their frequency percentage
+#with highest frequency in an English Wikipedia article.
 
-from bs4 import BeautifulSoup
-import requests
 import re
 import operator
-import json
-from tabulate import tabulate
 import sys
+import json
+import requests
+from tabulate import tabulate
+from bs4 import BeautifulSoup
 from stop_words import get_stop_words
+
 
 def getWordList(url):
     word_list = []
-    # raw data
+    #raw data
     source_code = requests.get(url)
-    # convert to text
+    #convert to text
     plain_text = source_code.text
-    # lxml format
+    #lxml format
     soup = BeautifulSoup(plain_text, 'lxml')
 
-    # find the words in paragraph tag
+    #find the words in paragraph tag
     for element in soup.findAll('p'):
         if element.text is None:
             continue
@@ -29,7 +30,8 @@ def getWordList(url):
 
         for word in words:
             cleaned_word = clean_word(word)
-            if len(cleaned_word) > 0:
+            cleaned_word_length = len(cleaned_word)
+            if cleaned_word_length > 0:
                 word_list.append(cleaned_word)
 
     return word_list
@@ -40,7 +42,7 @@ def clean_word(word):
     return cleaned_word
 
 
-def createFrquencyTable(word_list):
+def create_frquency_table(word_list):
     word_count = {}
 
     for word in word_list:
@@ -80,51 +82,52 @@ def main():
 
     try:
         response = requests.get(url)
-        # print(response.content)
+        #print(response.content)
         data = json.loads(response.content.decode("utf-8"))
-        # print(data)
+        #print(data)
 
-        # select the first page result
+        #select the first page result
         wikipedia_page_tag = data['query']['search'][0]['title']
         url = wikipedia_link + wikipedia_page_tag
         url = re.sub('\s+', '_', url)
         print('The page analysed is : ', url)
 
-        # get list of words from that page
+        #get list of words from that page
         page_word_list = getWordList(url)
 
     except requests.exceptions.Timeout:
         print("The server didn't respond. Please, try again later.")
 
-    # create table of word counts, dictionary
-    page_word_count = createFrquencyTable(page_word_list)
+    #create table of word counts, dictionary
+    page_word_count = create_frquency_table(page_word_list)
+    print(page_word_count.items())
 
-    # sort the table by the frequency count
+    #sort the table by the frequency count
     sorted_word_frequency_list = sorted(page_word_count.items(), key=operator.itemgetter(1), reverse=True)
 
-    # remove stop words if the user specified
+    #remove stop words if the user specified
     if remove:
         sorted_word_frequency_list = remove_stop_words(sorted_word_frequency_list)
 
-    # sum the total words to calculate frequencies   
+    #sum the total words to calculate frequencies   
     total_words_sum = 0
     for key, value in sorted_word_frequency_list:
         total_words_sum = total_words_sum + value
 
-    # just get the top 20 words
+    #just get the top 20 words
     if len(sorted_word_frequency_list) > 20:
         sorted_word_frequency_list = sorted_word_frequency_list[:20]
 
-    # create our final list which contains words, frequency (word count), percentage
+    #create our final list which contains words, frequency (word count), percentage
     final_list = []
     for key, value in sorted_word_frequency_list:
         percentage_value = float(value * 100) / total_words_sum
         final_list.append([key, value, round(percentage_value, 4)])
 
-    # headers before the table
+    #headers before the table
     print_headers = ['Word', 'Frequency', 'Frequency Percentage']
 
-    #print the table with tabulate
+    #rint the table with tabulate
     print(tabulate(final_list, headers=print_headers, tablefmt='orgtbl'))
 
 if __name__ == '__main__':

@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+from pprint import pprint
 import requests
 
 def extract(url):
@@ -16,12 +17,14 @@ def extract(url):
         if link.has_attr('href'):
             links.append(link.get('href'))
     
-    print(links)
+    return links
 
 
 def main():
     url = 'https://en.wikipedia.org/wiki/Main_Page'
-    extract(url)
+    links = extract(url)
+
+    pprint(links)
 
 
 if __name__ == '__main__':

@@ -128,7 +128,7 @@ def main():
     #headers before the table
     print_headers = ['Word', 'Frequency', 'Frequency Percentage']
 
-    #rint the table with tabulate
+    #print the table with tabulate
     print(tabulate(final_list, headers=print_headers, tablefmt='orgtbl'))
 
 if __name__ == '__main__':

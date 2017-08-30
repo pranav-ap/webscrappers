@@ -11,7 +11,7 @@ from bs4 import BeautifulSoup
 from stop_words import get_stop_words
 
 
-def getWordList(url):
+def get_word_list(url):
     word_list = []
     #raw data
     source_code = requests.get(url)
@@ -64,6 +64,7 @@ def remove_stop_words(frequency_list):
 
     return temp_list
 
+
 def main():
     wikipedia_api_link = "https://en.wikipedia.org/w/api.php?format=json&action=query&list=search&srsearch="
     wikipedia_link = "https://en.wikipedia.org/wiki/"
@@ -93,14 +94,14 @@ def main():
         print('The page analysed is : ', url)
 
         #get list of words from that page
-        page_word_list = getWordList(url)
+        page_word_list = get_word_list(url)
 
     except requests.exceptions.Timeout:
         print("The server didn't respond. Please, try again later.")
 
     #create table of word counts, dictionary
     page_word_count = create_frquency_table(page_word_list)
-    print(page_word_count.items())
+    # print(page_word_count.items())
 
     #sort the table by the frequency count
     sorted_word_frequency_list = sorted(page_word_count.items(), key=operator.itemgetter(1), reverse=True)
@@ -109,7 +110,7 @@ def main():
     if remove:
         sorted_word_frequency_list = remove_stop_words(sorted_word_frequency_list)
 
-    #sum the total words to calculate frequencies   
+    #sum the total words to calculate frequencies  
     total_words_sum = 0
     for key, value in sorted_word_frequency_list:
         total_words_sum = total_words_sum + value
